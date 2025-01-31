@@ -2,7 +2,77 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// Database connection
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL") // Update with your DB connection string
+  url      = env("DATABASE_URL")
+}
+
+// Users table
+model User {
+  id         String      @id @default(uuid())
+  telegramId String      @unique
+  photoUrl   String?
+  PictureUrl String?
+  name       String
+  studentId  String?     @unique
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  Belonging  Belonging[]
+  QRCode     QRCode[]
+}
+
+// Belongings table
+model Belonging {
+  id              String   @id @default(uuid())
+  telegramId      String   @unique
+  itemName        String
+  itemPhoto       String
+  itemDescription String
+  serialNumber    String?  @unique
+  student         User     @relation(fields: [studentId], references: [id])
+  studentId       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model WarningList {
+  id         String   @id @default(uuid())
+  telegramId String   @unique
+  name       String
+  day        String
+  studentId  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// Curfew Rules table
+model CurfewRule {
+  id        String    @id @default(uuid())
+  startTime DateTime?
+  endTime   DateTime?
+  length    String?
+  days      String?
+  createdAt DateTime  @default(now())
+}
+
+// QR Codes (optional if QR generation tracking is needed)
+model QRCode {
+  id         String   @id @default(uuid())
+  telegramId String   @unique
+  student    User     @relation(fields: [studentId], references: [id])
+  studentId  String
+  qrData     String?
+  createdAt  DateTime @default(now())
+}
+
+// Notifications table (for Telegram alerts)
+model Notification {
+  id          String   @id @default(uuid())
+  message     String
+  telegramId  String   @unique
+  type        String
+  createdAt   DateTime @default(now())
+  recipientId String
+  sentAt      DateTime @default(now())
 }
