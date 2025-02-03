@@ -1,15 +1,22 @@
 import { Router } from "express";
-import * as belongingController from "../controllers/belonging.controller";
-
+import {
+  getAllBelongings,
+  getBelongingByTelegramId,
+  createBelonging,
+  updateBelonging,
+  deleteBelonging,
+} from "../services/belonging.service";
+import { catchAsync } from "../utils/catchAsync";
 const router = Router();
 
-router.get("/belongings", belongingController.getAllBelongings);
-router.get(
-  "/belongings/:telegramId",
-  belongingController.getBelongingByTelegramId
-);
-router.post("/belongings", belongingController.createBelonging);
-router.put("/belongings/:telegramId", belongingController.updateBelonging);
-router.delete("/belongings/:telegramId", belongingController.deleteBelonging);
+router
+  .route("/belongings")
+  .get(catchAsync(getAllBelongings))
+  .post(catchAsync(createBelonging));
+router
+  .route("/belongings/:telegramId")
+  .get(catchAsync(getBelongingByTelegramId))
+  .put(catchAsync(updateBelonging))
+  .delete(catchAsync(deleteBelonging));
 
 export default router;

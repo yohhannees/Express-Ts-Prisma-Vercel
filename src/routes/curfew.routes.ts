@@ -1,12 +1,23 @@
 import { Router } from "express";
-import * as curfewRuleController from "../controllers/curfew.controller";
+import {
+  getCurfewRuleById,
+  getAllCurfewRules,
+  createCurfewRule,
+  updateCurfewRule,
+  deleteCurfewRule,
+} from "../services/curfew.service";
+import { catchAsync } from "../utils/catchAsync";
 
 const router = Router();
 
-router.get("/curfew-rules", curfewRuleController.getAllCurfewRules);
-router.get("/curfew-rules/:id", curfewRuleController.getCurfewRuleById);
-router.post("/curfew-rules", curfewRuleController.createCurfewRule);
-router.put("/curfew-rules/:id", curfewRuleController.updateCurfewRule);
-router.delete("/curfew-rules/:id", curfewRuleController.deleteCurfewRule);
+router
+  .route("/curfew-rules")
+  .get(catchAsync(getAllCurfewRules))
+  .post(catchAsync(createCurfewRule));
+router
+  .route("/curfew-rules/:id")
+  .get(catchAsync(getCurfewRuleById))
+  .put(catchAsync(updateCurfewRule))
+  .delete(deleteCurfewRule);
 
 export default router;

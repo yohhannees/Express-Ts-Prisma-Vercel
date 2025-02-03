@@ -1,12 +1,23 @@
 import { Router } from "express";
-import * as userController from "../controllers/users.controller";
+import {
+  getAllUsers,
+  getUserById,
+  createUser,
+  updateUser,
+  deleteUser,
+} from "../controllers/users.controller";
+import { catchAsync } from "../utils/catchAsync";
 
 const router = Router();
 
-router.get("/users", userController.getAllUsers);
-router.get("/users/:id", userController.getUserById);
-router.post("/users", userController.createUser);
-router.put("/users/:id", userController.updateUser);
-router.delete("/users/:id", userController.deleteUser);
+router
+  .route("/users")
+  .get(catchAsync(getAllUsers))
+  .post(catchAsync(createUser));
+router
+  .route("/users/:id")
+  .get(catchAsync(getUserById))
+  .put(catchAsync(updateUser))
+  .delete(catchAsync(deleteUser));
 
 export default router;
