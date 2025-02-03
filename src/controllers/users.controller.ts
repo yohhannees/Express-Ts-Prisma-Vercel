@@ -1,12 +1,16 @@
 import { Request, Response } from "express";
 import * as userService from "../services/users.service";
+import { AppError } from "../utils/appError";
+import { ResponseMessage } from "../utils/responseMessage";
+import { User } from "@prisma/client";
 
 export const getAllUsers = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   const users = await userService.getAllUsers();
-  res.json(users);
+  if (!users) throw new AppError(404, "Something went wrong.");
+  ResponseMessage.responedWithSuccess<User[]>(res, users, 200);
 };
 
 export const getUserById = async (
@@ -14,11 +18,8 @@ export const getUserById = async (
   res: Response
 ): Promise<void> => {
   const user = await userService.getUserByTelegramId(req.params.id);
-  if (user) {
-    res.json(user);
-  } else {
-    res.status(404).json({ message: "User not found" });
-  }
+  if (!user) throw new AppError(404, "user not fund");
+  ResponseMessage.responedWithSuccess<User>(res, user, 200);
 };
 
 export const createUser = async (
@@ -26,7 +27,8 @@ export const createUser = async (
   res: Response
 ): Promise<void> => {
   const user = await userService.upsertUser(req.body);
-  res.status(201).json(user);
+  if (!user) throw new AppError(404, "something went wrong");
+  ResponseMessage.responedWithSuccess<User>(res, user, 200);
 };
 
 export const updateUser = async (
@@ -34,7 +36,8 @@ export const updateUser = async (
   res: Response
 ): Promise<void> => {
   const user = await userService.updateUser(req.params.id, req.body);
-  res.json(user);
+  if (!user) throw new AppError(400, "something went wrong");
+  ResponseMessage.responedWithSuccess<User>(res, user, 200);
 };
 
 export const deleteUser = async (
@@ -42,5 +45,5 @@ export const deleteUser = async (
   res: Response
 ): Promise<void> => {
   await userService.deleteUser(req.params.id);
-  res.status(204).send();
+  ResponseMessage.responedWithSuccess<string>(res, "user deleted", 200);
 };

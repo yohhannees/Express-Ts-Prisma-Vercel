@@ -1,12 +1,16 @@
 import { Request, Response } from "express";
 import * as qrCodeService from "../services/qrcode.service";
+import { AppError } from "../utils/appError";
+import { ResponseMessage } from "../utils/responseMessage";
+import { QRCode } from "@prisma/client";
 
 export const getAllQRCodes = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   const qrCodes = await qrCodeService.getAllQRCodes();
-  res.json(qrCodes);
+  if (!qrCodes) throw new AppError(400, "something wents wrong");
+  ResponseMessage.responedWithSuccess<QRCode[]>(res, qrCodes, 200);
 };
 
 export const getQRCodeByTelegramId = async (
@@ -16,11 +20,8 @@ export const getQRCodeByTelegramId = async (
   const qrCode = await qrCodeService.getQRCodeByTelegramId(
     req.params.telegramId
   );
-  if (qrCode) {
-    res.json(qrCode);
-  } else {
-    res.status(404).json({ message: "QR Code not found" });
-  }
+  if (!qrCode) throw new AppError(404, "there is no qrcode in this id");
+  ResponseMessage.responedWithSuccess<QRCode>(res, qrCode, 200);
 };
 
 export const createQRCode = async (
@@ -28,7 +29,8 @@ export const createQRCode = async (
   res: Response
 ): Promise<void> => {
   const qrCode = await qrCodeService.createQRCode(req.body);
-  res.status(201).json(qrCode);
+  if (!qrCode) throw new AppError(400, "something went wrong");
+  ResponseMessage.responedWithSuccess<QRCode>(res, qrCode, 200);
 };
 
 export const updateQRCode = async (
@@ -39,13 +41,15 @@ export const updateQRCode = async (
     req.params.telegramId,
     req.body
   );
-  res.json(qrCode);
+  if (!qrCode) throw new AppError(404, "someting wents wrong");
+  ResponseMessage.responedWithSuccess<QRCode>(res, qrCode, 200);
 };
 
 export const deleteQRCode = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  await qrCodeService.deleteQRCode(req.params.telegramId);
-  res.status(204).send();
+  const qrcodeId = await qrCodeService.deleteQRCode(req.params.telegramId);
+  if (qrcodeId) throw new AppError(400, "something wents wrong");
+  ResponseMessage.responedWithSuccess<string>(res, "deleted", 200);
 };
